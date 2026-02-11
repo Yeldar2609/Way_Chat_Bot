@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wayland Academy Chatbot Demo</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="wa-chatbot-container" id="waChatbotContainer">
+        <!-- Kill Screen (initially hidden) -->
+        <div class="wa-chatbot-kill-screen" id="waKillScreen">
+            <h2>Chatbot Disabled</h2>
+            <p>The chatbot has been temporarily disabled. Click below to reactivate it.</p>
+            <button class="wa-chatbot-reactivate-btn" id="waReactivateBtn" aria-label="Reactivate chatbot">
+                Reactivate Chatbot
+            </button>
+        </div>
+
+        <!-- Main Chatbot Interface -->
+        <div id="waChatbotMain">
+            <!-- Header -->
+            <header class="wa-chatbot-header">
+                <div class="wa-chatbot-header-left">
+                    <h1 class="wa-chatbot-title">Wayland Academy Assistant</h1>
+                    <p class="wa-chatbot-subtitle">Your guide to campus life</p>
+                </div>
+                <div class="wa-chatbot-header-right">
+                    <span class="wa-chatbot-badge">Capstone Demo v1.0</span>
+                    <button class="wa-chatbot-kill-btn" id="waKillSwitchBtn" aria-label="Disable chatbot">
+                        Kill Switch
+                    </button>
+                </div>
+            </header>
+
+            <!-- Warning Banner -->
+            <div class="wa-chatbot-warning">
+                ⚠️ Prototype for demo. Official answers should be confirmed with school offices.
+            </div>
+
+            <!-- Messages Area -->
+            <div class="wa-chatbot-messages" id="waChatMessages">
+                <!-- Messages will be dynamically added here -->
+            </div>
+
+            <!-- Suggested Prompts -->
+            <div class="wa-chatbot-suggestions" id="waSuggestions">
+                <!-- Suggestion chips will be dynamically added here -->
+            </div>
+
+            <!-- Input Area -->
+            <div class="wa-chatbot-input-area">
+                <div class="wa-chatbot-input-wrapper">
+                    <input
+                        type="text"
+                        class="wa-chatbot-input"
+                        id="waUserInput"
+                        placeholder="Ask me about Wayland Academy..."
+                        aria-label="Type your question"
+                        autocomplete="off"
+                    >
+                    <button class="wa-chatbot-send-btn" id="waSendBtn" aria-label="Send message">
+                        Send
+                    </button>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <footer class="wa-chatbot-footer">
+                Version 1.0 | Capstone Project Demo | Contact: <a href="tel:920-356-2120" style="color: #0066cc;">920-356-2120</a>
+            </footer>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
