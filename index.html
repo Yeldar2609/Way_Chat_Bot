@@ -1,16 +1,965 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Capstone Chatbot Demo Site</title>
-    <meta property="og:image" content="https://bolt.new/static/og_default.png" />
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:image" content="https://bolt.new/static/og_default.png" />
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wayland Academy Assistant</title>
+    <style>
+        /* ===== WAYLAND CHATBOT WIDGET - SCOPED STYLES ===== */
+        /* All classes namespaced with wa-chatbot- prefix for safe embedding */
+
+        :root {
+            --wa-primary-red: #B4232A;
+            --wa-primary-red-dark: #8F151B;
+            --wa-accent-red: #C93B3F;
+            --wa-warm-bg: #F8F3F1;
+            --wa-cream-banner: #FFF3D6;
+            --wa-text-primary: #1F2937;
+            --wa-text-muted: #6B7280;
+            --wa-success-green: #15803D;
+            --wa-border-soft: #E7D8D8;
+            --wa-white: #FFFFFF;
+            --wa-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+            --wa-shadow-md: 0 4px 6px rgba(0, 0, 0, 0.07);
+            --wa-shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Prevent global style pollution */
+        .wa-chatbot-root * {
+            box-sizing: border-box;
+        }
+
+        /* ===== LAUNCHER BUTTON ===== */
+        .wa-chatbot-launcher {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            z-index: 999999;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        }
+
+        .wa-chatbot-launcher-btn {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--wa-primary-red) 0%, var(--wa-accent-red) 100%);
+            border: none;
+            color: var(--wa-white);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: var(--wa-shadow-lg);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-size: 28px;
+            position: relative;
+        }
+
+        .wa-chatbot-launcher-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 15px 35px rgba(180, 35, 42, 0.25);
+        }
+
+        .wa-chatbot-launcher-btn:active {
+            transform: scale(0.95);
+        }
+
+        .wa-chatbot-launcher-btn:focus {
+            outline: none;
+            box-shadow: 0 0 0 4px rgba(180, 35, 42, 0.2), var(--wa-shadow-lg);
+        }
+
+        .wa-chatbot-launcher-btn::after {
+            content: '';
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background: var(--wa-success-green);
+            border: 3px solid var(--wa-white);
+            border-radius: 50%;
+            bottom: -2px;
+            right: -2px;
+            animation: wa-pulse 2s infinite;
+        }
+
+        @keyframes wa-pulse {
+            0%, 100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+            50% {
+                opacity: 0.6;
+                transform: scale(1.15);
+            }
+        }
+
+        .wa-chatbot-launcher-label {
+            position: absolute;
+            bottom: 70px;
+            right: 0;
+            background: var(--wa-white);
+            color: var(--wa-text-primary);
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 500;
+            white-space: nowrap;
+            box-shadow: var(--wa-shadow-md);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s;
+        }
+
+        .wa-chatbot-launcher-btn:hover ~ .wa-chatbot-launcher-label {
+            opacity: 1;
+        }
+
+        /* ===== WIDGET PANEL ===== */
+        .wa-chatbot-widget {
+            position: fixed;
+            bottom: 96px;
+            right: 24px;
+            z-index: 999998;
+            width: 420px;
+            max-height: 600px;
+            background: var(--wa-white);
+            border-radius: 12px;
+            box-shadow: var(--wa-shadow-lg);
+            display: flex;
+            flex-direction: column;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            opacity: 0;
+            transform: translateY(20px) scale(0.95);
+            pointer-events: none;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .wa-chatbot-widget.wa-chatbot-open {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+            pointer-events: auto;
+        }
+
+        .wa-chatbot-widget.wa-chatbot-hidden {
+            display: none !important;
+        }
+
+        /* ===== WIDGET HEADER ===== */
+        .wa-chatbot-header {
+            background: linear-gradient(135deg, var(--wa-primary-red) 0%, var(--wa-accent-red) 100%);
+            color: var(--wa-white);
+            padding: 16px;
+            border-radius: 12px 12px 0 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .wa-chatbot-header-left {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .wa-chatbot-title {
+            font-size: 16px;
+            font-weight: 700;
+            margin: 0;
+            margin-bottom: 2px;
+        }
+
+        .wa-chatbot-subtitle {
+            font-size: 12px;
+            opacity: 0.95;
+            margin: 0;
+        }
+
+        .wa-chatbot-header-right {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .wa-chatbot-badge {
+            background: rgba(255, 255, 255, 0.25);
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            white-space: nowrap;
+        }
+
+        .wa-chatbot-kill-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: var(--wa-white);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+        }
+
+        .wa-chatbot-kill-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .wa-chatbot-kill-btn:focus {
+            outline: none;
+            box-shadow: inset 0 0 0 2px var(--wa-white);
+        }
+
+        /* ===== WARNING BANNER ===== */
+        .wa-chatbot-warning {
+            background: var(--wa-cream-banner);
+            color: #92400e;
+            padding: 10px 14px;
+            font-size: 12px;
+            text-align: center;
+            border-bottom: 1px solid #fbbf24;
+            line-height: 1.4;
+        }
+
+        /* ===== MESSAGES AREA ===== */
+        .wa-chatbot-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 14px;
+            background: var(--wa-warm-bg);
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            scroll-behavior: smooth;
+        }
+
+        .wa-chatbot-messages::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .wa-chatbot-messages::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .wa-chatbot-messages::-webkit-scrollbar-thumb {
+            background: var(--wa-border-soft);
+            border-radius: 3px;
+        }
+
+        .wa-chatbot-message {
+            display: flex;
+            gap: 8px;
+            animation: wa-fadeIn 0.3s ease-in;
+        }
+
+        @keyframes wa-fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(8px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .wa-chatbot-message-bot {
+            align-self: flex-start;
+        }
+
+        .wa-chatbot-message-user {
+            align-self: flex-end;
+            flex-direction: row-reverse;
+        }
+
+        .wa-chatbot-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 13px;
+            flex-shrink: 0;
+        }
+
+        .wa-chatbot-message-bot .wa-chatbot-avatar {
+            background: linear-gradient(135deg, var(--wa-primary-red) 0%, var(--wa-accent-red) 100%);
+            color: var(--wa-white);
+        }
+
+        .wa-chatbot-message-user .wa-chatbot-avatar {
+            background: var(--wa-success-green);
+            color: var(--wa-white);
+        }
+
+        .wa-chatbot-message-content {
+            max-width: 70%;
+            min-width: 60px;
+        }
+
+        .wa-chatbot-message-bubble {
+            padding: 10px 12px;
+            border-radius: 12px;
+            line-height: 1.5;
+            font-size: 13px;
+            word-wrap: break-word;
+        }
+
+        .wa-chatbot-message-bot .wa-chatbot-message-bubble {
+            background: var(--wa-white);
+            color: var(--wa-text-primary);
+            border: 1px solid var(--wa-border-soft);
+        }
+
+        .wa-chatbot-message-user .wa-chatbot-message-bubble {
+            background: var(--wa-primary-red);
+            color: var(--wa-white);
+        }
+
+        .wa-chatbot-message-time {
+            font-size: 11px;
+            color: var(--wa-text-muted);
+            margin-top: 4px;
+            padding: 0 2px;
+        }
+
+        .wa-chatbot-message-user .wa-chatbot-message-time {
+            text-align: right;
+        }
+
+        /* ===== SUGGESTIONS ===== */
+        .wa-chatbot-suggestions {
+            padding: 8px 12px;
+            background: var(--wa-warm-bg);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            border-bottom: 1px solid var(--wa-border-soft);
+        }
+
+        .wa-chatbot-suggestion-chip {
+            background: var(--wa-white);
+            border: 1px solid var(--wa-border-soft);
+            color: var(--wa-text-primary);
+            padding: 6px 10px;
+            border-radius: 16px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+
+        .wa-chatbot-suggestion-chip:hover {
+            background: var(--wa-primary-red);
+            color: var(--wa-white);
+            border-color: var(--wa-primary-red);
+            transform: translateY(-1px);
+        }
+
+        .wa-chatbot-suggestion-chip:focus {
+            outline: none;
+            box-shadow: inset 0 0 0 2px var(--wa-primary-red);
+        }
+
+        /* ===== INPUT AREA ===== */
+        .wa-chatbot-input-area {
+            padding: 12px;
+            background: var(--wa-white);
+            border-top: 1px solid var(--wa-border-soft);
+            border-radius: 0 0 12px 12px;
+        }
+
+        .wa-chatbot-input-wrapper {
+            display: flex;
+            gap: 8px;
+        }
+
+        .wa-chatbot-input {
+            flex: 1;
+            padding: 8px 12px;
+            border: 1.5px solid var(--wa-border-soft);
+            border-radius: 8px;
+            font-size: 13px;
+            font-family: inherit;
+            transition: border-color 0.2s;
+        }
+
+        .wa-chatbot-input:focus {
+            outline: none;
+            border-color: var(--wa-primary-red);
+            box-shadow: 0 0 0 3px rgba(180, 35, 42, 0.1);
+        }
+
+        .wa-chatbot-send-btn {
+            background: linear-gradient(135deg, var(--wa-primary-red) 0%, var(--wa-accent-red) 100%);
+            color: var(--wa-white);
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .wa-chatbot-send-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: var(--wa-shadow-md);
+        }
+
+        .wa-chatbot-send-btn:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(180, 35, 42, 0.2);
+        }
+
+        .wa-chatbot-send-btn:disabled {
+            background: var(--wa-text-muted);
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        /* ===== FOOTER ===== */
+        .wa-chatbot-footer {
+            background: var(--wa-warm-bg);
+            padding: 10px 12px;
+            text-align: center;
+            font-size: 11px;
+            color: var(--wa-text-muted);
+            border-radius: 0 0 12px 12px;
+            border-top: 1px solid var(--wa-border-soft);
+        }
+
+        .wa-chatbot-footer a {
+            color: var(--wa-primary-red);
+            text-decoration: none;
+        }
+
+        .wa-chatbot-footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* ===== DISABLED STATE ===== */
+        .wa-chatbot-disabled-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(248, 243, 241, 0.85);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s;
+        }
+
+        .wa-chatbot-widget.wa-chatbot-disabled .wa-chatbot-disabled-overlay {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .wa-chatbot-disabled-text {
+            background: var(--wa-white);
+            padding: 16px;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: var(--wa-shadow-md);
+            border: 1px solid var(--wa-border-soft);
+        }
+
+        .wa-chatbot-disabled-text p {
+            margin: 0;
+            font-size: 12px;
+            color: var(--wa-text-primary);
+            font-weight: 500;
+        }
+
+        /* ===== RESPONSIVE DESIGN ===== */
+        @media (max-width: 768px) {
+            .wa-chatbot-widget {
+                width: calc(100% - 32px);
+                bottom: 96px;
+                right: 16px;
+                left: 16px;
+                max-width: none;
+            }
+
+            .wa-chatbot-launcher {
+                bottom: 16px;
+                right: 16px;
+            }
+
+            .wa-chatbot-message-content {
+                max-width: 80%;
+            }
+
+            .wa-chatbot-suggestion-chip {
+                font-size: 11px;
+                padding: 5px 9px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .wa-chatbot-launcher-label {
+                display: none;
+            }
+
+            .wa-chatbot-widget {
+                width: 100%;
+                bottom: 0;
+                right: 0;
+                left: 0;
+                max-height: calc(100vh - 80px);
+                border-radius: 16px 16px 0 0;
+            }
+
+            .wa-chatbot-launcher-btn {
+                width: 48px;
+                height: 48px;
+                font-size: 24px;
+            }
+
+            .wa-chatbot-header {
+                padding: 12px;
+            }
+
+            .wa-chatbot-title {
+                font-size: 14px;
+            }
+
+            .wa-chatbot-badge {
+                display: none;
+            }
+
+            .wa-chatbot-messages {
+                padding: 10px;
+                gap: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Root container for complete widget isolation -->
+    <div class="wa-chatbot-root">
+        <!-- Launcher Button -->
+        <div class="wa-chatbot-launcher">
+            <button
+                class="wa-chatbot-launcher-btn"
+                id="waLauncherBtn"
+                aria-label="Open Wayland Academy Assistant"
+                aria-expanded="false"
+                aria-controls="waChatbotWidget"
+            >
+                👤
+            </button>
+            <div class="wa-chatbot-launcher-label">Chat with us!</div>
+        </div>
+
+        <!-- Chat Widget Panel -->
+        <div
+            class="wa-chatbot-widget"
+            id="waChatbotWidget"
+            role="region"
+            aria-label="Chat assistant"
+            aria-live="polite"
+        >
+            <!-- Disabled Overlay -->
+            <div class="wa-chatbot-disabled-overlay">
+                <div class="wa-chatbot-disabled-text">
+                    <p>Assistant is currently disabled</p>
+                </div>
+            </div>
+
+            <!-- Header -->
+            <header class="wa-chatbot-header">
+                <div class="wa-chatbot-header-left">
+                    <h1 class="wa-chatbot-title">Wayland Academy</h1>
+                    <p class="wa-chatbot-subtitle">Assistant</p>
+                </div>
+                <div class="wa-chatbot-header-right">
+                    <span class="wa-chatbot-badge">Demo v2.0</span>
+                    <button
+                        class="wa-chatbot-kill-btn"
+                        id="waKillSwitchBtn"
+                        aria-label="Disable assistant"
+                    >
+                        Disable
+                    </button>
+                </div>
+            </header>
+
+            <!-- Warning Banner -->
+            <div class="wa-chatbot-warning">
+                ⚠️ Prototype demo. Official answers should be confirmed with school offices.
+            </div>
+
+            <!-- Messages Area -->
+            <div class="wa-chatbot-messages" id="waChatMessages" role="log"></div>
+
+            <!-- Suggested Prompts -->
+            <div class="wa-chatbot-suggestions" id="waSuggestions"></div>
+
+            <!-- Input Area -->
+            <div class="wa-chatbot-input-area">
+                <div class="wa-chatbot-input-wrapper">
+                    <input
+                        type="text"
+                        class="wa-chatbot-input"
+                        id="waUserInput"
+                        placeholder="Ask a question..."
+                        aria-label="Type your question"
+                        autocomplete="off"
+                    >
+                    <button
+                        class="wa-chatbot-send-btn"
+                        id="waSendBtn"
+                        aria-label="Send message"
+                    >
+                        Send
+                    </button>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <footer class="wa-chatbot-footer">
+                <div>Version 2.0 | <a href="tel:920-356-2120">920-356-2120</a></div>
+            </footer>
+        </div>
+    </div>
+
+    <script>
+        // ===== WAYLAND CHATBOT WIDGET v2.0 =====
+        // Floating launcher with expandable chat panel
+        // All code scoped to prevent global leakage
+
+        (function() {
+            'use strict';
+
+            // ===== CONFIG =====
+            const CONFIG = {
+                storageKeyDisabled: 'wa_chatbot_disabled',
+                storageKeyOpen: 'wa_chatbot_open',
+                suggestedPrompts: [
+                    "What grades does Wayland serve?",
+                    "Tell me about daily schedule",
+                    "What clubs are available?",
+                    "Where is Wayland located?",
+                    "What if I'm sick?"
+                ]
+            };
+
+            // ===== KNOWLEDGE BASE =====
+            const KNOWLEDGE_BASE = [
+                {
+                    intents: ['grade', 'grades', 'year', 'years', 'level', '9', '10', '11', '12', 'serve'],
+                    response: "Wayland Academy is a private boarding and day school serving grades 9–12. We welcome students from around the world to our campus in Beaver Dam, Wisconsin."
+                },
+                {
+                    intents: ['location', 'address', 'where', 'find', 'beaver dam', 'wisconsin'],
+                    response: "Wayland Academy is located at 101 North University Avenue, Beaver Dam, WI 53916. We're in south-central Wisconsin."
+                },
+                {
+                    intents: ['phone', 'contact', 'call', 'number', 'reach'],
+                    response: "Main phone: 920-356-2120. For admissions: 800-860-7725. We're happy to help!"
+                },
+                {
+                    intents: ['boarding', 'day student', 'live', 'campus', 'residential', 'dorm', 'housing'],
+                    response: "Approximately 70% of Wayland students live on campus in our residence halls. We're both a boarding and day school."
+                },
+                {
+                    intents: ['schedule', 'daily', 'day', 'classes', 'time', 'block', 'a/b', 'ab', 'rotation'],
+                    response: "Wayland uses an A/B week schedule with block rotation. Free time: 5:45–8:00 pm. Mandatory study hall Sunday–Thursday: 8:00–9:30 pm."
+                },
+                {
+                    intents: ['study hall', 'homework', 'evening', 'night', 'study'],
+                    response: "Study hall is mandatory Sunday–Thursday from 8:00–9:30 pm. This structured time helps students stay on top of academics."
+                },
+                {
+                    intents: ['myblock', 'my block', 'enrichment', 'independent', 'elective'],
+                    response: "MyBlock is a special time for independent study, clubs, enrichment, or meeting with teachers. A great opportunity to explore interests!"
+                },
+                {
+                    intents: ['assembly', 'chapel', 'monday', 'friday', 'gathering', 'meeting'],
+                    response: "We gather for Assembly on Mondays and Chapel on Fridays. These important traditions bring our community together."
+                },
+                {
+                    intents: ['club', 'clubs', 'activities', 'extracurricular', 'robotics', 'sewing', 'theater', 'model un', 'thespian'],
+                    response: "Wayland offers diverse clubs including Robotics Club, Sewing Club, Model UN, Thespian Society, and many more! Check with Student Life for the full list."
+                },
+                {
+                    intents: ['robotics', 'robot', 'stem', 'engineering'],
+                    response: "Robotics Club is a popular STEM activity! Students design, build, and compete. Great for teamwork and problem-solving skills."
+                },
+                {
+                    intents: ['sewing', 'fashion', 'clothing', 'textile', 'arts'],
+                    response: "Sewing Club welcomes all students interested in fashion and design. No prior experience needed—bring your creativity!"
+                },
+                {
+                    intents: ['theater', 'theatre', 'drama', 'acting', 'thespian', 'play', 'musical', 'performance'],
+                    response: "Thespian Society is for students passionate about theater! We produce plays and musicals throughout the year."
+                },
+                {
+                    intents: ['dining', 'food', 'meal', 'cafeteria', 'eat', 'lunch', 'dinner', 'breakfast'],
+                    response: "Our dining supports many dietary needs. For specific restrictions or allergies, please contact the Health Center to ensure proper accommodations."
+                },
+                {
+                    intents: ['allergy', 'allergies', 'dietary', 'vegetarian', 'vegan', 'gluten', 'restriction'],
+                    response: "We accommodate various dietary needs. Contact the Health Center directly to discuss allergies or dietary requirements. Your health is our priority."
+                },
+                {
+                    intents: ['sick', 'ill', 'illness', 'not feeling', 'health', 'nurse', 'doctor', 'medical'],
+                    response: "If sick and missing classes, go to the Health Center—don't stay in your room. Hours: Monday–Friday, 7:30 a.m.–3:30 p.m."
+                },
+                {
+                    intents: ['health center', 'healthcare', 'clinic', 'emergency'],
+                    response: "Health Center hours: Monday–Friday, 7:30 a.m.–3:30 p.m. For emergencies outside these hours, contact your dorm parent or on-duty staff."
+                },
+                {
+                    intents: ['tradition', 'traditions', 'event', 'events', 'parade', 'celebration'],
+                    response: "Wayland has wonderful traditions including our annual Parade of Nations, celebrating the diversity of our international community."
+                },
+                {
+                    intents: ['weekend', 'saturday', 'sunday', 'free time', 'activities', 'trips'],
+                    response: "Weekends offer time for relaxation and activities. Student Life organizes weekend trips and on-campus events throughout the year."
+                },
+                {
+                    intents: ['admission', 'admissions', 'apply', 'application', 'enroll', 'join'],
+                    response: "For admissions questions, call 800-860-7725. Our admissions team can guide you through the application process."
+                },
+                {
+                    intents: ['tuition', 'cost', 'price', 'financial', 'scholarship', 'aid', 'payment'],
+                    response: "For tuition and financial aid information, contact Admissions at 800-860-7725. We can discuss options for your family."
+                },
+                {
+                    intents: ['hi', 'hello', 'hey', 'greetings', 'help', 'thanks'],
+                    response: "Welcome to Wayland Academy! I'm here to answer questions about our schedule, clubs, residence life, and more. What can I help with?"
+                }
+            ];
+
+            // ===== DOM ELEMENTS =====
+            const elements = {
+                root: document.querySelector('.wa-chatbot-root'),
+                launcher: document.querySelector('.wa-chatbot-launcher'),
+                launcherBtn: document.getElementById('waLauncherBtn'),
+                widget: document.getElementById('waChatbotWidget'),
+                messages: document.getElementById('waChatMessages'),
+                suggestions: document.getElementById('waSuggestions'),
+                userInput: document.getElementById('waUserInput'),
+                sendBtn: document.getElementById('waSendBtn'),
+                killSwitchBtn: document.getElementById('waKillSwitchBtn')
+            };
+
+            // ===== STATE =====
+            let isOpen = false;
+            let isDisabled = false;
+
+            // ===== UTILITY FUNCTIONS =====
+            function getCurrentTime() {
+                const now = new Date();
+                return now.toLocaleTimeString('en-US', {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    hour12: true
+                });
+            }
+
+            function sanitizeHTML(text) {
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            }
+
+            function scrollToBottom() {
+                setTimeout(() => {
+                    elements.messages.scrollTop = elements.messages.scrollHeight;
+                }, 50);
+            }
+
+            // ===== WIDGET OPEN/CLOSE =====
+            function openWidget() {
+                if (isDisabled) return;
+                isOpen = true;
+                elements.widget.classList.add('wa-chatbot-open');
+                elements.launcherBtn.setAttribute('aria-expanded', 'true');
+                localStorage.setItem(CONFIG.storageKeyOpen, 'true');
+                elements.userInput.focus();
+            }
+
+            function closeWidget() {
+                isOpen = false;
+                elements.widget.classList.remove('wa-chatbot-open');
+                elements.launcherBtn.setAttribute('aria-expanded', 'false');
+                localStorage.removeItem(CONFIG.storageKeyOpen);
+            }
+
+            // ===== MESSAGES =====
+            function addMessage(text, isUser = false) {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `wa-chatbot-message ${isUser ? 'wa-chatbot-message-user' : 'wa-chatbot-message-bot'}`;
+
+                const avatar = document.createElement('div');
+                avatar.className = 'wa-chatbot-avatar';
+                avatar.textContent = isUser ? 'Y' : 'WA';
+                avatar.setAttribute('aria-hidden', 'true');
+
+                const content = document.createElement('div');
+                content.className = 'wa-chatbot-message-content';
+
+                const bubble = document.createElement('div');
+                bubble.className = 'wa-chatbot-message-bubble';
+                bubble.innerHTML = sanitizeHTML(text);
+
+                const time = document.createElement('div');
+                time.className = 'wa-chatbot-message-time';
+                time.textContent = getCurrentTime();
+
+                content.appendChild(bubble);
+                content.appendChild(time);
+                messageDiv.appendChild(avatar);
+                messageDiv.appendChild(content);
+
+                elements.messages.appendChild(messageDiv);
+                scrollToBottom();
+            }
+
+            // ===== INTENT MATCHING =====
+            function findBestMatch(userInput) {
+                const input = userInput.toLowerCase().trim();
+
+                for (const qa of KNOWLEDGE_BASE) {
+                    for (const intent of qa.intents) {
+                        if (input.includes(intent.toLowerCase())) {
+                            return qa.response;
+                        }
+                    }
+                }
+
+                return null;
+            }
+
+            function getDefaultResponse() {
+                return "Great question! I may not have that in this demo yet. For official information:\n\nMain: 920-356-2120\nAdmissions: 800-860-7725\n\nA real person can give you the best answer!";
+            }
+
+            // ===== USER INTERACTION =====
+            function handleUserMessage() {
+                if (isDisabled) return;
+
+                const userText = elements.userInput.value.trim();
+                if (!userText) return;
+
+                addMessage(userText, true);
+                elements.userInput.value = '';
+
+                setTimeout(() => {
+                    const response = findBestMatch(userText) || getDefaultResponse();
+                    addMessage(response, false);
+                }, 600);
+            }
+
+            function handleSuggestionClick(suggestionText) {
+                elements.userInput.value = suggestionText;
+                handleUserMessage();
+            }
+
+            // ===== KILL SWITCH =====
+            function disableChatbot() {
+                isDisabled = true;
+                elements.widget.classList.add('wa-chatbot-disabled');
+                localStorage.setItem(CONFIG.storageKeyDisabled, 'true');
+            }
+
+            function enableChatbot() {
+                isDisabled = false;
+                elements.widget.classList.remove('wa-chatbot-disabled');
+                localStorage.removeItem(CONFIG.storageKeyDisabled);
+            }
+
+            function checkDisabledState() {
+                if (localStorage.getItem(CONFIG.storageKeyDisabled) === 'true') {
+                    disableChatbot();
+                }
+            }
+
+            // ===== INITIALIZATION =====
+            function renderSuggestions() {
+                CONFIG.suggestedPrompts.forEach(prompt => {
+                    const chip = document.createElement('button');
+                    chip.className = 'wa-chatbot-suggestion-chip';
+                    chip.textContent = prompt;
+                    chip.setAttribute('aria-label', `Ask: ${prompt}`);
+                    chip.addEventListener('click', () => handleSuggestionClick(prompt));
+                    elements.suggestions.appendChild(chip);
+                });
+            }
+
+            function showWelcomeMessage() {
+                addMessage(
+                    "Hi! 👋 I'm your Wayland Academy assistant. Ask me about our schedule, clubs, location, or anything else about campus life!"
+                );
+            }
+
+            function attachEventListeners() {
+                elements.launcherBtn.addEventListener('click', () => {
+                    isOpen ? closeWidget() : openWidget();
+                });
+
+                elements.widget.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                });
+
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape' && isOpen) {
+                        closeWidget();
+                    }
+                });
+
+                elements.sendBtn.addEventListener('click', handleUserMessage);
+
+                elements.userInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        handleUserMessage();
+                    }
+                });
+
+                elements.killSwitchBtn.addEventListener('click', () => {
+                    isDisabled ? enableChatbot() : disableChatbot();
+                });
+            }
+
+            function restoreState() {
+                if (localStorage.getItem(CONFIG.storageKeyOpen) === 'true' && !isDisabled) {
+                    openWidget();
+                }
+            }
+
+            function init() {
+                checkDisabledState();
+                renderSuggestions();
+                attachEventListeners();
+                showWelcomeMessage();
+                restoreState();
+            }
+
+            // Launch when DOM is ready
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', init);
+            } else {
+                init();
+            }
+
+        })();
+    </script>
+</body>
 </html>

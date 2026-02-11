@@ -1,157 +1,167 @@
-# Wayland Chatbot Demo v1 - Testing Checklist
+# Wayland Chatbot Demo v2.0 - Testing Checklist
 
-## ✅ Pre-Demo Testing (Required)
+## Pre-Launch QA
 
-### Core Functionality
-- [ ] Open `wayland-chatbot-demo.html` in Chrome (works without server)
-- [ ] Open in Firefox (cross-browser compatibility)
-- [ ] Open in Safari (if available)
-- [ ] Verify welcome message appears within 1 second
-- [ ] Click each of the 5 suggested prompt chips - confirm auto-send works
-- [ ] Type a question and click "Send" button - response appears
-- [ ] Type a question and press Enter key - response appears
-- [ ] Try empty input - nothing should happen (no error)
+### Browser & Device Testing
+- [ ] **Desktop Chrome** - All features functional, no console errors
+- [ ] **Desktop Firefox** - All features functional, no console errors
+- [ ] **Desktop Safari** - All features functional, no console errors
+- [ ] **Mobile iOS Safari** - Responsive layout, touch targets 44px+
+- [ ] **Mobile Android Chrome** - Responsive layout, touch targets 44px+
+- [ ] **Tablet (iPad)** - Widget scales appropriately
 
-### Intent Matching (Test 10+ Queries)
-- [ ] "What grades does Wayland serve?" → Grades 9-12 response
-- [ ] "Where is the school located?" → Address response
-- [ ] "What's the phone number?" → Contact info response
-- [ ] "Tell me about clubs" → Clubs list response
-- [ ] "What if I'm sick?" → Health Center guidance
-- [ ] "A/B schedule" → Schedule explanation
-- [ ] "study hall" → Study hall hours response
-- [ ] "robotics club" → Robotics description
-- [ ] "food allergies" → Dietary accommodation info
-- [ ] "boarding students" → 70% boarding stat
-- [ ] "random nonsense question" → Fallback with contact info
+### Launcher Functionality
+- [ ] Launcher appears in bottom-right corner
+- [ ] Launcher button has red gradient background
+- [ ] Green "online" dot pulses at bottom-right of launcher
+- [ ] "Chat with us!" label appears on hover (desktop)
+- [ ] Label hides on small screens (mobile)
+- [ ] Click launcher opens widget with smooth animation
+- [ ] Click launcher again closes widget with smooth animation
+- [ ] Widget closes when Escape key pressed
+- [ ] Icon shows person emoji (👤)
 
-### Kill Switch
-- [ ] Click "Kill Switch" button in header
-- [ ] Chatbot hides, kill screen shows
-- [ ] Refresh page - kill screen persists (localStorage check)
-- [ ] Click "Reactivate Chatbot" button
-- [ ] Chatbot returns, previous messages cleared
-- [ ] Verify functionality works normally after reactivation
+### Widget Panel - Header
+- [ ] Title reads "Wayland Academy"
+- [ ] Subtitle reads "Assistant"
+- [ ] "Demo v2.0" badge appears
+- [ ] Disable button present and accessible
+- [ ] Header has red gradient background
+- [ ] All text readable with good contrast
 
-### UI/UX Polish
-- [ ] Messages have timestamps
-- [ ] User messages align right (blue background)
-- [ ] Bot messages align left (white background)
-- [ ] Messages animate in smoothly
-- [ ] Auto-scroll to newest message works
-- [ ] Warning banner is visible and readable
-- [ ] Demo badge displays in header
+### Widget Panel - Warning Banner
+- [ ] Warning banner appears below header
+- [ ] Text reads: "⚠️ Prototype demo. Official answers should be confirmed with school offices."
+- [ ] Banner background is cream-colored
+- [ ] Banner visible at all times
 
-### Responsive Design Testing
+### Chat Functionality
+- [ ] Widget shows welcome message on first open
+- [ ] User message appears on right side with green background
+- [ ] Bot message appears on left side with white background and border
+- [ ] Messages auto-scroll to show newest
+- [ ] Each message shows timestamp
+- [ ] Avatars show: Bot = "WA", User = "Y"
+- [ ] Message bubbles have appropriate rounded corners
+- [ ] No console errors when messages added
 
-#### Desktop (1920x1080)
-- [ ] Layout looks centered and professional
-- [ ] All text is readable
+### Suggested Prompts
+- [ ] 5 suggestion chips appear below messages
+- [ ] Click chip auto-fills input and sends question
+- [ ] Response appears from bot
+- [ ] Chips have visible focus style for keyboard navigation
+
+### Input & Send
+- [ ] Input field has focus ring
+- [ ] Send button has red gradient background
+- [ ] Click Send button submits message
+- [ ] Press Enter key submits message
+- [ ] Input clears after message sent
+
+### FAQ Testing
+
+#### School Basics
+- [ ] "What grades does Wayland serve?" → Returns grades 9-12
+- [ ] "Where is Wayland located?" → Returns full address
+- [ ] "How do I contact Wayland?" → Returns phone numbers
+
+#### Schedule & Time
+- [ ] "Tell me about daily schedule" → Returns A/B week, study hall
+- [ ] "What is MyBlock?" → Returns enrichment time description
+- [ ] "What about assembly and chapel?" → Returns correct days
+
+#### Clubs & Activities
+- [ ] "What clubs are available?" → Lists clubs
+- [ ] "Tell me about robotics" → Mentions design and build
+- [ ] "Tell me about sewing" → Mentions fashion and design
+- [ ] "Tell me about theater" → Mentions Thespian Society
+
+#### Residential Life
+- [ ] "How many students live on campus?" → Returns ~70%
+
+#### Health Services
+- [ ] "What if I'm sick?" → Directs to Health Center
+- [ ] "What are Health Center hours?" → Returns hours
+
+#### Unknown Questions
+- [ ] "What is the capital of France?" → Returns fallback with contact info
+
+### Kill Switch (Disable Function)
+- [ ] Click "Disable" button in header
+- [ ] Widget shows "Assistant is currently disabled"
+- [ ] All interactive elements become unresponsive
+- [ ] Refresh page - widget remains disabled
+- [ ] Kill switch state persists in localStorage
+- [ ] Re-enable works and removes overlay
+
+### Responsive Behavior
+
+#### Desktop (1920px+)
+- [ ] Widget positioned bottom-right
+- [ ] Width approximately 420px
+- [ ] Launcher label visible on hover
+
+#### Tablet (768px)
+- [ ] Widget width responsive
+- [ ] Touch targets 44px minimum
+
+#### Mobile (375px - 768px)
+- [ ] Widget spans almost full width
+- [ ] Widget positioned above launcher
+- [ ] Launcher label hidden
+- [ ] All touch targets 44px+
+
+#### Small Mobile (320px)
+- [ ] Widget spans full width
+- [ ] All text readable
 - [ ] No horizontal scroll
 
-#### Tablet (768x1024)
-- [ ] Touch targets are large enough
-- [ ] Suggestion chips wrap properly
-- [ ] Messages scale appropriately
-
-#### Mobile (375x667 - iPhone SE)
-- [ ] Container takes full height
-- [ ] Input area accessible above keyboard
-- [ ] Message bubbles don't exceed 85% width
-- [ ] All buttons are tappable
-
-#### Small Mobile (320x568)
-- [ ] Everything still functional
-- [ ] No text cutoff
-- [ ] Chips are smaller but readable
-
 ### Accessibility Testing
-- [ ] Tab through all interactive elements (logical order)
-- [ ] All buttons show focus outline when tabbed to
-- [ ] Input field has proper focus state
-- [ ] Screen reader can read aria-labels (if available)
-- [ ] Color contrast is sufficient (text readable on all backgrounds)
-- [ ] Enter key works in input field
 
-## 🎯 Capstone Demo Preparation
+#### Keyboard Navigation
+- [ ] Tab moves focus through all interactive elements
+- [ ] Shift+Tab reverses tab order
+- [ ] All focused elements have visible outline
+- [ ] Outline color contrasts with background
 
-### Screenshot/Presentation Checklist
-- [ ] Take screenshot of initial state (welcome message visible)
-- [ ] Take screenshot of active conversation (3-4 messages)
-- [ ] Take screenshot of suggested prompts in use
-- [ ] Take screenshot showing mobile view
-- [ ] Take screenshot of kill switch screen
-- [ ] Prepare 2-3 demo questions that show variety
+#### Color Contrast
+- [ ] Button text readable on red gradient (white on red)
+- [ ] Message text readable (dark on white, white on red)
+- [ ] Warning banner text readable (brown on cream)
 
-### Demo Script Suggestions
-1. "Let me show you the chatbot's welcome screen..."
-2. "I'll click a suggested prompt about clubs..."
-3. "Now I'll type a custom question about the schedule..."
-4. "For safety, there's a kill switch that immediately disables it..."
-5. "It handles unknown questions gracefully by routing to real staff..."
+### Animation Testing
+- [ ] Launcher pulse animation smooth
+- [ ] Widget open/close animations smooth
+- [ ] Message fade-in smooth
+- [ ] Hover transitions smooth
 
-## 🔒 Safety & Embed Testing (Critical for Finalsite)
+### Performance Testing
+- [ ] Page loads quickly (< 2s)
+- [ ] No jank when typing
+- [ ] Scrolling smooth in message area
+- [ ] Open/close multiple times - still works
+- [ ] Send 20+ messages - still responsive
 
-### Isolation Tests
-- [ ] Inspect CSS classes - all prefixed with `wa-chatbot-`
-- [ ] No global style pollution (body/html styles are scoped)
-- [ ] View page source - no external CDN dependencies
-- [ ] localStorage only uses `waylandChatbotDisabled` key (scoped)
-- [ ] No console errors in browser DevTools
+### Security Testing
+- [ ] localStorage working correctly
+- [ ] No sensitive data in localStorage
+- [ ] User input properly sanitized
+- [ ] Widget styles don't affect page outside widget
+- [ ] No global CSS pollution
 
-### Embed Simulation (Optional Advanced Test)
-- [ ] Create a test HTML page with other content
-- [ ] Embed the chatbot code in an iframe
-- [ ] Verify chatbot doesn't break parent page styles
-- [ ] Verify kill switch works in iframe context
+### Before Demo Day
 
-## 📊 Content Accuracy Check
+- [ ] Test on actual demo computer
+- [ ] Test internet connection
+- [ ] Browser zoom at 100%
+- [ ] Close other browser tabs
+- [ ] Take final screenshots
+- [ ] Have backup (screenshots, PDF)
 
-### Required Facts Present in Responses
-- [ ] Grades 9-12 mentioned
-- [ ] Correct address: 101 North University Avenue, Beaver Dam, WI 53916
-- [ ] Correct phones: 920-356-2120 (main), 800-860-7725 (admissions)
-- [ ] Free time: 5:45–8:00 pm
-- [ ] Study hall: 8:00–9:30 pm (Sun-Thu)
-- [ ] Health Center hours: Mon-Fri, 7:30 a.m.–3:30 p.m.
-- [ ] ~70% boarding students
-- [ ] Clubs: Robotics, Sewing, Model UN, Thespian Society mentioned
-- [ ] Assembly Mondays, Chapel Fridays
-- [ ] Parade of Nations tradition
+## Sign-Off
 
-## ⚠️ Common Issues to Watch For
+**Tested By:** [Your Name]
+**Date:** [Date]
+**Pass/Fail:** PASS / FAIL
 
-- Input field doesn't clear after sending → Check `handleUserMessage()` function
-- Messages don't scroll to bottom → Check `scrollToBottom()` timing
-- Kill switch doesn't persist → Check localStorage browser support
-- Suggestion chips don't work on mobile → Check touch event handling
-- Text overflows on small screens → Check responsive breakpoints
-
-## ✨ Bonus Points (Optional Enhancements)
-
-- [ ] Test on school's actual computer/browser
-- [ ] Show chatbot to teacher/advisor for feedback
-- [ ] Test on a tablet device
-- [ ] Verify works offline (no network required)
-- [ ] Show peer the kill switch feature
-
----
-
-## 🚀 Pre-Submission Final Check
-
-Before submitting for capstone review:
-1. **Functionality**: All core features work
-2. **Professional Look**: UI is polished, not buggy
-3. **Safety**: Kill switch tested and working
-4. **Content**: All school facts are accurate
-5. **Documentation**: This checklist is completed
-6. **Backup**: Files are saved in multiple locations
-
-**Testing Status**: _____ / _____ items completed
-
-**Ready for Demo**: ☐ Yes ☐ Needs fixes
-
-**Notes**:
-_____________________________________________________________________________
-_____________________________________________________________________________
-_____________________________________________________________________________
+If any test fails, debug and retest before demo day!
