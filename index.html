@@ -629,28 +629,16 @@
                     <p class="wa-chatbot-subtitle">Assistant</p>
                 </div>
                 <div class="wa-chatbot-header-right">
-                    <span class="wa-chatbot-badge">Demo v2.1</span>
-                    <button
-                        class="wa-chatbot-minimize-btn"
-                        id="waMinimizeBtn"
-                        aria-label="Minimize chat widget"
-                    >
-                        −
-                    </button>
                     <button
                         class="wa-chatbot-kill-btn"
                         id="waKillSwitchBtn"
-                        aria-label="Disable assistant"
+                        aria-label="Close chat"
                     >
-                        Disable
+                        ✕
                     </button>
                 </div>
             </header>
 
-            <!-- Warning Banner -->
-            <div class="wa-chatbot-warning">
-                ⚠️ Prototype demo. Official answers should be confirmed with school offices.
-            </div>
 
             <!-- Messages Area -->
             <div class="wa-chatbot-messages" id="waChatMessages" role="log"></div>
@@ -907,7 +895,7 @@
             }
 
             function getDefaultResponse() {
-                return "Great question! I may not have that in this demo yet. For official information:\n\nMain: 920-356-2120\nAdmissions: 800-860-7725\n\nA real person can give you the best answer!";
+                return "Great question! For official information:\n\nMain: 920-356-2120\nAdmissions: 800-860-7725\n\nA real person can give you the best answer!";
             }
 
             // ===== USER INTERACTION =====
@@ -1019,7 +1007,7 @@
                 });
 
                 elements.killSwitchBtn.addEventListener('click', () => {
-                    isDisabled ? enableChatbot() : disableChatbot();
+                    closeWidget();
                 });
             }
 
