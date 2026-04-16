@@ -973,6 +973,8 @@
                 addMessage(
                     "Hi! 👋 I'm your Wayland Academy assistant. Ask me about our schedule, clubs, location, or anything else about campus life!"
                 );
+                // Keep widget open after welcome message
+                openWidget();
             }
 
             function attachEventListeners() {
@@ -1022,8 +1024,8 @@
                 checkMinimizedState();
                 renderSuggestions();
                 attachEventListeners();
-                showWelcomeMessage();
                 restoreState();
+                showWelcomeMessage();
             }
 
             // Launch when DOM is ready
