@@ -42,7 +42,7 @@
             width: 56px;
             height: 56px;
             border-radius: 50%;
-            background: linear-gradient(135deg, var(--wa-primary-red) 0%, var(--wa-accent-red) 100%);
+            background: transparent;
             border: none;
             color: var(--wa-white);
             cursor: pointer;
@@ -51,8 +51,16 @@
             justify-content: center;
             box-shadow: var(--wa-shadow-lg);
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            font-size: 28px;
+            font-size: 0;
             position: relative;
+            padding: 2px;
+            overflow: hidden;
+        }
+
+        .wa-chatbot-launcher-btn svg {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
         }
 
         .wa-chatbot-launcher-btn:hover {
@@ -279,8 +287,8 @@
         }
 
         .wa-chatbot-avatar {
-            width: 32px;
-            height: 32px;
+            width: 36px;
+            height: 36px;
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -291,8 +299,14 @@
         }
 
         .wa-chatbot-message-bot .wa-chatbot-avatar {
-            background: linear-gradient(135deg, var(--wa-primary-red) 0%, var(--wa-accent-red) 100%);
+            background: transparent;
             color: var(--wa-white);
+        }
+        
+        .wa-chatbot-message-bot .wa-chatbot-avatar svg {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
         }
 
         .wa-chatbot-message-user .wa-chatbot-avatar {
@@ -563,7 +577,30 @@
                 aria-expanded="false"
                 aria-controls="waChatbotWidget"
             >
-                👤
+                <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" style="filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));">
+                    <!-- Hair -->
+                    <path d="M 60 50 Q 50 30 100 25 Q 150 30 140 50 Q 135 40 130 35 Q 100 20 70 35 Q 65 40 60 50 Z" fill="#8B3A3A"/>
+                    <!-- Hair accent -->
+                    <path d="M 70 32 Q 80 20 100 22 Q 115 24 120 35" fill="#A0504A" opacity="0.8"/>
+                    <!-- Main head circle -->
+                    <circle cx="100" cy="110" r="70" fill="#E74C3C"/>
+                    <!-- Left eye white -->
+                    <circle cx="75" cy="95" r="16" fill="#FFFFFF"/>
+                    <!-- Left eye pupil -->
+                    <circle cx="78" cy="98" r="10" fill="#1F2937"/>
+                    <!-- Left eye shine -->
+                    <circle cx="80" cy="95" r="4" fill="#FFFFFF"/>
+                    <!-- Right eye white -->
+                    <circle cx="125" cy="95" r="16" fill="#FFFFFF"/>
+                    <!-- Right eye pupil -->
+                    <circle cx="122" cy="98" r="10" fill="#1F2937"/>
+                    <!-- Right eye shine -->
+                    <circle cx="120" cy="95" r="4" fill="#FFFFFF"/>
+                    <!-- Smile -->
+                    <path d="M 75 125 Q 100 145 125 125" stroke="#1F2937" stroke-width="4" fill="none" stroke-linecap="round"/>
+                    <!-- Mouth opening -->
+                    <ellipse cx="100" cy="135" rx="15" ry="12" fill="#1F2937" opacity="0.3"/>
+                </svg>
             </button>
             <div class="wa-chatbot-launcher-label">Chat with us!</div>
         </div>
@@ -650,11 +687,7 @@
                     "What grades does Wayland serve?",
                     "What clubs are available?",
                     "Where is Wayland located?"
-                ],
-                aiEndpoint: 'https://ai.hackclub.com/proxy/v1/chat/completions',
-                aiModel: 'openai/gpt-5-mini',
-                apiKey: 'REPLACE_WITH_YOUR_HACKCLUB_AI_KEY',
-                maxConversationTurns: 12
+                ]
             };
 
             // ===== KNOWLEDGE BASE =====
@@ -761,41 +794,6 @@
             // ===== STATE =====
             let isOpen = false;
             let isDisabled = false;
-            let isWaitingForReply = false;
-            let conversationHistory = [];
-
-            // ===== AI SYSTEM PROMPT =====
-            function buildKnowledgeContext() {
-                return KNOWLEDGE_BASE.map((entry) => `- ${entry.response}`).join('\n');
-            }
-
-            function buildSystemPrompt() {
-                return [
-                    'You are the Wayland Academy website assistant.',
-                    'Follow these guardrails strictly:',
-                    '- Never share private student information (discipline, schedules, room numbers, or contact info of students).',
-                    '- Never diagnose medical or mental health conditions.',
-                    '- Never promise official decisions (admissions, aid, policy outcomes).',
-                    '- Never invent facts or policies that are not in the provided knowledge context.',
-                    '- For health or dietary requests, direct users to the Schoen Health Center and official channels.',
-                    '- Prefer wording like: "Based on Wayland Academy information..." when answering factual questions.',
-                    '- Keep responses concise, warm, and family-friendly.',
-                    '',
-                    'Official contacts:',
-                    '- Main: 920-356-2120',
-                    '- Admissions: 800-860-7725',
-                    '',
-                    'Knowledge context:',
-                    buildKnowledgeContext()
-                ].join('\n');
-            }
-
-            function resetConversationHistory() {
-                conversationHistory = [{
-                    role: 'system',
-                    content: buildSystemPrompt()
-                }];
-            }
 
             // ===== UTILITY FUNCTIONS =====
             function getCurrentTime() {
@@ -841,13 +839,47 @@
             }
 
             // ===== MESSAGES =====
+            function createMascotSVG() {
+                const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                svg.setAttribute('viewBox', '0 0 200 200');
+                svg.setAttribute('style', 'filter: drop-shadow(0 1px 2px rgba(0,0,0,0.1));');
+                
+                const paths = [
+                    { tag: 'path', attrs: { d: 'M 60 50 Q 50 30 100 25 Q 150 30 140 50 Q 135 40 130 35 Q 100 20 70 35 Q 65 40 60 50 Z', fill: '#8B3A3A' } },
+                    { tag: 'path', attrs: { d: 'M 70 32 Q 80 20 100 22 Q 115 24 120 35', fill: '#A0504A', opacity: '0.8' } },
+                    { tag: 'circle', attrs: { cx: '100', cy: '110', r: '70', fill: '#E74C3C' } },
+                    { tag: 'circle', attrs: { cx: '75', cy: '95', r: '16', fill: '#FFFFFF' } },
+                    { tag: 'circle', attrs: { cx: '78', cy: '98', r: '10', fill: '#1F2937' } },
+                    { tag: 'circle', attrs: { cx: '80', cy: '95', r: '4', fill: '#FFFFFF' } },
+                    { tag: 'circle', attrs: { cx: '125', cy: '95', r: '16', fill: '#FFFFFF' } },
+                    { tag: 'circle', attrs: { cx: '122', cy: '98', r: '10', fill: '#1F2937' } },
+                    { tag: 'circle', attrs: { cx: '120', cy: '95', r: '4', fill: '#FFFFFF' } },
+                    { tag: 'path', attrs: { d: 'M 75 125 Q 100 145 125 125', stroke: '#1F2937', 'stroke-width': '4', fill: 'none', 'stroke-linecap': 'round' } },
+                    { tag: 'ellipse', attrs: { cx: '100', cy: '135', rx: '15', ry: '12', fill: '#1F2937', opacity: '0.3' } }
+                ];
+                
+                paths.forEach(item => {
+                    const el = document.createElementNS('http://www.w3.org/2000/svg', item.tag);
+                    Object.entries(item.attrs).forEach(([key, val]) => {
+                        el.setAttribute(key, val);
+                    });
+                    svg.appendChild(el);
+                });
+                
+                return svg;
+            }
+
             function addMessage(text, isUser = false) {
                 const messageDiv = document.createElement('div');
                 messageDiv.className = `wa-chatbot-message ${isUser ? 'wa-chatbot-message-user' : 'wa-chatbot-message-bot'}`;
 
                 const avatar = document.createElement('div');
                 avatar.className = 'wa-chatbot-avatar';
-                avatar.textContent = isUser ? '👤' : 'WA';
+                if (isUser) {
+                    avatar.textContent = '👤';
+                } else {
+                    avatar.appendChild(createMascotSVG());
+                }
                 avatar.setAttribute('aria-hidden', 'true');
 
                 const content = document.createElement('div');
@@ -870,7 +902,7 @@
                 scrollToBottom();
             }
 
-            // ===== INTENT MATCHING (AI FALLBACK) =====
+            // ===== INTENT MATCHING =====
             function findBestMatch(userInput) {
                 const input = userInput.toLowerCase().trim();
 
@@ -886,75 +918,23 @@
             }
 
             function getDefaultResponse() {
-                return "Thanks for your question. Based on Wayland Academy information, the best next step is to contact the school directly for official guidance. Main: 920-356-2120 | Admissions: 800-860-7725.";
-            }
-
-            async function getAIResponse(userText) {
-                if (!CONFIG.apiKey || !CONFIG.aiEndpoint) {
-                    return findBestMatch(userText) || getDefaultResponse();
-                }
-
-                const recentHistory = conversationHistory.slice(-(CONFIG.maxConversationTurns * 2));
-                const messages = [...recentHistory, { role: 'user', content: userText }];
-
-                const response = await fetch(CONFIG.aiEndpoint, {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${CONFIG.apiKey}`,
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        model: CONFIG.aiModel,
-                        messages
-                    })
-                });
-
-                if (!response.ok) {
-                    throw new Error(`AI request failed with status ${response.status}`);
-                }
-
-                const payload = await response.json();
-                const text = payload?.choices?.[0]?.message?.content?.trim();
-
-                if (!text) {
-                    throw new Error('AI response was empty');
-                }
-
-                return text;
-            }
-
-            function setWaitingState(waiting) {
-                isWaitingForReply = waiting;
-                elements.userInput.disabled = waiting;
-                elements.sendBtn.disabled = waiting;
-                elements.sendBtn.textContent = waiting ? 'Thinking…' : 'Send';
+                return "Great question! I may not have that in this demo yet. For official information:\n\nMain: 920-356-2120\nAdmissions: 800-860-7725\n\nA real person can give you the best answer!";
             }
 
             // ===== USER INTERACTION =====
-            async function handleUserMessage() {
-                if (isDisabled || isWaitingForReply) return;
+            function handleUserMessage() {
+                if (isDisabled) return;
 
                 const userText = elements.userInput.value.trim();
                 if (!userText) return;
 
                 addMessage(userText, true);
                 elements.userInput.value = '';
-                setWaitingState(true);
 
-                try {
-                    const aiText = await getAIResponse(userText);
-                    addMessage(aiText, false);
-
-                    conversationHistory.push({ role: 'user', content: userText });
-                    conversationHistory.push({ role: 'assistant', content: aiText });
-                } catch (error) {
-                    const fallback = findBestMatch(userText) || getDefaultResponse();
-                    addMessage(fallback, false);
-                    console.error('Wayland chatbot AI error:', error);
-                } finally {
-                    setWaitingState(false);
-                    elements.userInput.focus();
-                }
+                setTimeout(() => {
+                    const response = findBestMatch(userText) || getDefaultResponse();
+                    addMessage(response, false);
+                }, 600);
             }
 
             function handleSuggestionClick(suggestionText) {
@@ -1035,7 +1015,6 @@
 
             function init() {
                 checkDisabledState();
-                resetConversationHistory();
                 renderSuggestions();
                 attachEventListeners();
                 showWelcomeMessage();
