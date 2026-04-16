@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { X } from 'lucide-react';
 
+const BOT_AVATAR_SRC = '/image-removebg-preview.png';
+
 function App() {
   const [isOpen, setIsOpen] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
@@ -23,9 +25,9 @@ function App() {
             <div className="bg-red-500 rounded-lg shadow-2xl p-4 max-w-sm w-96">
               <div className="flex justify-between items-center mb-4">
                 <img
-                  src="/WaylandAcademyHorizontal_withSeal_WhiteOnly_TransparentBackground.png"
-                  alt="Wayland Academy"
-                  className="h-8"
+                  src={BOT_AVATAR_SRC}
+                  alt="Chatbot Logo"
+                  className="h-10 w-10 rounded-full border-2 border-white object-cover"
                 />
                 <button
                   onClick={() => setIsOpen(false)}
@@ -35,8 +37,15 @@ function App() {
                   <X size={20} />
                 </button>
               </div>
-              <div className="text-white text-sm">
-                <p>How can we help you today?</p>
+              <div className="text-white text-sm flex items-start gap-3">
+                <img
+                  src={BOT_AVATAR_SRC}
+                  alt="Bot avatar"
+                  className="h-8 w-8 rounded-full border border-white/80 object-cover"
+                />
+                <div className="bg-white/15 px-3 py-2 rounded-2xl rounded-tl-md max-w-[75%]">
+                  <p>How can we help you today?</p>
+                </div>
               </div>
             </div>
           </div>
@@ -58,7 +67,7 @@ function App() {
             }`}
           >
             <img
-              src="/image-removebg-preview.png"
+              src={BOT_AVATAR_SRC}
               alt="Student Avatar"
               className={`transition-transform duration-300 ${
                 isOpen && !isMinimized ? 'scale-75' : 'scale-100'
