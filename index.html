@@ -117,11 +117,11 @@
         /* ===== WIDGET PANEL ===== */
         .wa-chatbot-widget {
             position: fixed;
-            bottom: 96px;
+            bottom: 24px;
             right: 24px;
             z-index: 999998;
-            width: 420px;
-            max-height: 600px;
+            width: 391px;
+            max-height: 483px;
             background: var(--wa-white);
             border-radius: 12px;
             box-shadow: var(--wa-shadow-lg);
@@ -129,27 +129,16 @@
             flex-direction: column;
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
             opacity: 0;
-            transform: translateY(20px) scale(0.95);
+            transform: scale(0.15) translateY(40px);
+            transform-origin: bottom right;
             pointer-events: none;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1), transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
 
         .wa-chatbot-widget.wa-chatbot-open {
             opacity: 1;
-            transform: translateY(0) scale(1);
+            transform: scale(1) translateY(0);
             pointer-events: auto;
-        }
-
-        .wa-chatbot-widget.wa-chatbot-hidden {
-            display: none !important;
-        }
-
-        .wa-chatbot-widget.wa-chatbot-minimized {
-            max-height: 0;
-            opacity: 0;
-            transform: translateY(20px) scale(0.95);
-            pointer-events: none;
-            overflow: hidden;
         }
 
         /* ===== WIDGET HEADER ===== */
@@ -187,8 +176,6 @@
             display: flex;
             gap: 8px;
             align-items: center;
-            flex-wrap: wrap;
-            justify-content: flex-end;
         }
 
         .wa-chatbot-badge {
@@ -206,14 +193,17 @@
             background: rgba(255, 255, 255, 0.2);
             color: var(--wa-white);
             border: 1px solid rgba(255, 255, 255, 0.3);
-            padding: 6px 12px;
-            border-radius: 6px;
-            font-size: 11px;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            font-size: 14px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.2s;
-            text-transform: uppercase;
-            letter-spacing: 0.4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
         }
 
         .wa-chatbot-kill-btn:hover {
@@ -221,29 +211,6 @@
         }
 
         .wa-chatbot-kill-btn:focus {
-            outline: none;
-            box-shadow: inset 0 0 0 2px var(--wa-white);
-        }
-
-        .wa-chatbot-minimize-btn {
-            background: rgba(255, 255, 255, 0.2);
-            color: var(--wa-white);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            padding: 6px 12px;
-            border-radius: 6px;
-            font-size: 11px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-            text-transform: uppercase;
-            letter-spacing: 0.4px;
-        }
-
-        .wa-chatbot-minimize-btn:hover {
-            background: rgba(255, 255, 255, 0.3);
-        }
-
-        .wa-chatbot-minimize-btn:focus {
             outline: none;
             box-shadow: inset 0 0 0 2px var(--wa-white);
         }
@@ -269,6 +236,7 @@
             flex-direction: column;
             gap: 12px;
             scroll-behavior: smooth;
+            max-height: 184px;
         }
 
         .wa-chatbot-messages::-webkit-scrollbar {
@@ -320,24 +288,17 @@
             font-weight: 700;
             font-size: 13px;
             flex-shrink: 0;
-            overflow: hidden;
         }
 
         .wa-chatbot-message-bot .wa-chatbot-avatar {
-            background: var(--wa-primary-red);
+            background: linear-gradient(135deg, var(--wa-primary-red) 0%, var(--wa-accent-red) 100%);
             color: var(--wa-white);
-            position: relative;
-        }
-
-        .wa-chatbot-message-bot .wa-chatbot-avatar img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
         }
 
         .wa-chatbot-message-user .wa-chatbot-avatar {
-            background: var(--wa-success-green);
+            background: #9CA3AF;
             color: var(--wa-white);
+            font-size: 18px;
         }
 
         .wa-chatbot-message-content {
@@ -632,13 +593,12 @@
                     <button
                         class="wa-chatbot-kill-btn"
                         id="waKillSwitchBtn"
-                        aria-label="Close chat"
+                        aria-label="Close assistant"
                     >
                         ✕
                     </button>
                 </div>
             </header>
-
 
             <!-- Messages Area -->
             <div class="wa-chatbot-messages" id="waChatMessages" role="log"></div>
@@ -669,7 +629,7 @@
 
             <!-- Footer -->
             <footer class="wa-chatbot-footer">
-                <div>Version 2.1 | <a href="tel:920-356-2120">920-356-2120</a></div>
+                <div><a href="tel:920-356-2120">920-356-2120</a></div>
             </footer>
         </div>
     </div>
@@ -686,100 +646,102 @@
             const CONFIG = {
                 storageKeyDisabled: 'wa_chatbot_disabled',
                 storageKeyOpen: 'wa_chatbot_open',
-                storageKeyMinimized: 'wa_chatbot_minimized',
                 suggestedPrompts: [
-                    "What grades?",
-                    "What's the schedule?",
-                    "Any clubs?",
-                    "Where are you?"
-                ]
+                    "What grades does Wayland serve?",
+                    "What clubs are available?",
+                    "Where is Wayland located?"
+                ],
+                aiEndpoint: 'https://ai.hackclub.com/proxy/v1/chat/completions',
+                aiModel: 'openai/gpt-5-mini',
+                apiKey: 'REPLACE_WITH_YOUR_HACKCLUB_AI_KEY',
+                maxConversationTurns: 12
             };
 
             // ===== KNOWLEDGE BASE =====
             const KNOWLEDGE_BASE = [
                 {
                     intents: ['grade', 'grades', 'year', 'years', 'level', '9', '10', '11', '12', 'serve'],
-                    response: "Grades 9–12. Boarding and day school."
+                    response: "Wayland Academy is a private boarding and day school serving grades 9–12. We welcome students from around the world to our campus in Beaver Dam, Wisconsin."
                 },
                 {
                     intents: ['location', 'address', 'where', 'find', 'beaver dam', 'wisconsin'],
-                    response: "101 North University Avenue, Beaver Dam, WI 53916."
+                    response: "Wayland Academy is located at 101 North University Avenue, Beaver Dam, WI 53916. We're in south-central Wisconsin."
                 },
                 {
                     intents: ['phone', 'contact', 'call', 'number', 'reach'],
-                    response: "Main: 920-356-2120. Admissions: 800-860-7725."
+                    response: "Main phone: 920-356-2120. For admissions: 800-860-7725. We're happy to help!"
                 },
                 {
                     intents: ['boarding', 'day student', 'live', 'campus', 'residential', 'dorm', 'housing'],
-                    response: "About 70% of students live on campus."
+                    response: "Approximately 70% of Wayland students live on campus in our residence halls. We're both a boarding and day school."
                 },
                 {
                     intents: ['schedule', 'daily', 'day', 'classes', 'time', 'block', 'a/b', 'ab', 'rotation'],
-                    response: "A/B week blocks. Free time 5:45–8 pm. Study hall Sun–Thu 8–9:30 pm."
+                    response: "Wayland uses an A/B week schedule with block rotation. Free time: 5:45–8:00 pm. Mandatory study hall Sunday–Thursday: 8:00–9:30 pm."
                 },
                 {
                     intents: ['study hall', 'homework', 'evening', 'night', 'study'],
-                    response: "Mandatory Sun–Thu, 8–9:30 pm."
+                    response: "Study hall is mandatory Sunday–Thursday from 8:00–9:30 pm. This structured time helps students stay on top of academics."
                 },
                 {
                     intents: ['myblock', 'my block', 'enrichment', 'independent', 'elective'],
-                    response: "Time for independent study, clubs, or meeting with teachers."
+                    response: "MyBlock is a special time for independent study, clubs, enrichment, or meeting with teachers. A great opportunity to explore interests!"
                 },
                 {
                     intents: ['assembly', 'chapel', 'monday', 'friday', 'gathering', 'meeting'],
-                    response: "Assembly Mondays, Chapel Fridays. Community traditions."
+                    response: "We gather for Assembly on Mondays and Chapel on Fridays. These important traditions bring our community together."
                 },
                 {
                     intents: ['club', 'clubs', 'activities', 'extracurricular', 'robotics', 'sewing', 'theater', 'model un', 'thespian'],
-                    response: "Robotics, Sewing, Model UN, Thespian Society, and more!"
+                    response: "Wayland offers diverse clubs including Robotics Club, Sewing Club, Model UN, Thespian Society, and many more! Check with Student Life for the full list."
                 },
                 {
                     intents: ['robotics', 'robot', 'stem', 'engineering'],
-                    response: "Students design, build, and compete. STEM focus."
+                    response: "Robotics Club is a popular STEM activity! Students design, build, and compete. Great for teamwork and problem-solving skills."
                 },
                 {
                     intents: ['sewing', 'fashion', 'clothing', 'textile', 'arts'],
-                    response: "Fashion and design club. No experience needed."
+                    response: "Sewing Club welcomes all students interested in fashion and design. No prior experience needed—bring your creativity!"
                 },
                 {
                     intents: ['theater', 'theatre', 'drama', 'acting', 'thespian', 'play', 'musical', 'performance'],
-                    response: "Plays and musicals throughout the year."
+                    response: "Thespian Society is for students passionate about theater! We produce plays and musicals throughout the year."
                 },
                 {
                     intents: ['dining', 'food', 'meal', 'cafeteria', 'eat', 'lunch', 'dinner', 'breakfast'],
-                    response: "We accommodate dietary needs. Contact Health Center for specifics."
+                    response: "Our dining supports many dietary needs. For specific restrictions or allergies, please contact the Health Center to ensure proper accommodations."
                 },
                 {
                     intents: ['allergy', 'allergies', 'dietary', 'vegetarian', 'vegan', 'gluten', 'restriction'],
-                    response: "Contact Health Center for allergies or dietary requirements."
+                    response: "We accommodate various dietary needs. Contact the Health Center directly to discuss allergies or dietary requirements. Your health is our priority."
                 },
                 {
                     intents: ['sick', 'ill', 'illness', 'not feeling', 'health', 'nurse', 'doctor', 'medical'],
-                    response: "Go to Health Center (don't stay in room). Hours: Mon–Fri 7:30 am–3:30 pm."
+                    response: "If sick and missing classes, go to the Health Center—don't stay in your room. Hours: Monday–Friday, 7:30 a.m.–3:30 p.m."
                 },
                 {
                     intents: ['health center', 'healthcare', 'clinic', 'emergency'],
-                    response: "Hours: Mon–Fri 7:30 am–3:30 pm. Emergencies: contact dorm parent."
+                    response: "Health Center hours: Monday–Friday, 7:30 a.m.–3:30 p.m. For emergencies outside these hours, contact your dorm parent or on-duty staff."
                 },
                 {
                     intents: ['tradition', 'traditions', 'event', 'events', 'parade', 'celebration'],
-                    response: "Annual Parade of Nations celebrates our international community."
+                    response: "Wayland has wonderful traditions including our annual Parade of Nations, celebrating the diversity of our international community."
                 },
                 {
                     intents: ['weekend', 'saturday', 'sunday', 'free time', 'activities', 'trips'],
-                    response: "Student Life organizes weekend trips and on-campus events."
+                    response: "Weekends offer time for relaxation and activities. Student Life organizes weekend trips and on-campus events throughout the year."
                 },
                 {
-                    intents: ['admission', 'admissions', 'apply', 'application', 'enroll', 'join'],
-                    response: "Call 800-860-7725 for admissions guidance."
+                    intents: ['admission', 'admissions', 'apply', 'application', 'enroll', 'join', 'sign up'],
+                    response: "For admissions questions, call 800-860-7725. Our admissions team can guide you through the application process."
                 },
                 {
                     intents: ['tuition', 'cost', 'price', 'financial', 'scholarship', 'aid', 'payment'],
-                    response: "Contact Admissions at 800-860-7725 for financial aid info."
+                    response: "For tuition and financial aid information, contact Admissions at 800-860-7725. We can discuss options for your family."
                 },
                 {
                     intents: ['hi', 'hello', 'hey', 'greetings', 'help', 'thanks'],
-                    response: "Hi! Ask me about schedule, clubs, location, or campus life!"
+                    response: "Welcome to Wayland Academy! I'm here to answer questions about our schedule, clubs, residence life, and more. What can I help with?"
                 }
             ];
 
@@ -793,14 +755,47 @@
                 suggestions: document.getElementById('waSuggestions'),
                 userInput: document.getElementById('waUserInput'),
                 sendBtn: document.getElementById('waSendBtn'),
-                minimizeBtn: document.getElementById('waMinimizeBtn'),
                 killSwitchBtn: document.getElementById('waKillSwitchBtn')
             };
 
             // ===== STATE =====
             let isOpen = false;
-            let isMinimized = false;
             let isDisabled = false;
+            let isWaitingForReply = false;
+            let conversationHistory = [];
+
+            // ===== AI SYSTEM PROMPT =====
+            function buildKnowledgeContext() {
+                return KNOWLEDGE_BASE.map((entry) => `- ${entry.response}`).join('\n');
+            }
+
+            function buildSystemPrompt() {
+                return [
+                    'You are the Wayland Academy website assistant.',
+                    'Follow these guardrails strictly:',
+                    '- Never share private student information (discipline, schedules, room numbers, or contact info of students).',
+                    '- Never diagnose medical or mental health conditions.',
+                    '- Never promise official decisions (admissions, aid, policy outcomes).',
+                    '- Never invent facts or policies that are not in the provided knowledge context.',
+                    '- For health or dietary requests, direct users to the Schoen Health Center and official channels.',
+                    '- Prefer wording like: "Based on Wayland Academy information..." when answering factual questions.',
+                    '- Keep responses concise, warm, and family-friendly.',
+                    '',
+                    'Official contacts:',
+                    '- Main: 920-356-2120',
+                    '- Admissions: 800-860-7725',
+                    '',
+                    'Knowledge context:',
+                    buildKnowledgeContext()
+                ].join('\n');
+            }
+
+            function resetConversationHistory() {
+                conversationHistory = [{
+                    role: 'system',
+                    content: buildSystemPrompt()
+                }];
+            }
 
             // ===== UTILITY FUNCTIONS =====
             function getCurrentTime() {
@@ -830,6 +825,7 @@
                 isOpen = true;
                 elements.widget.classList.add('wa-chatbot-open');
                 elements.launcherBtn.setAttribute('aria-expanded', 'true');
+                elements.launcher.style.display = 'none';
                 localStorage.setItem(CONFIG.storageKeyOpen, 'true');
                 elements.userInput.focus();
             }
@@ -838,6 +834,9 @@
                 isOpen = false;
                 elements.widget.classList.remove('wa-chatbot-open');
                 elements.launcherBtn.setAttribute('aria-expanded', 'false');
+                setTimeout(() => {
+                    elements.launcher.style.display = '';
+                }, 320);
                 localStorage.removeItem(CONFIG.storageKeyOpen);
             }
 
@@ -848,16 +847,8 @@
 
                 const avatar = document.createElement('div');
                 avatar.className = 'wa-chatbot-avatar';
+                avatar.textContent = isUser ? '👤' : 'WA';
                 avatar.setAttribute('aria-hidden', 'true');
-
-                if (isUser) {
-                    avatar.textContent = 'Y';
-                } else {
-                    const img = document.createElement('img');
-                    img.src = 'image-removebg-preview.png';
-                    img.alt = 'Assistant';
-                    avatar.appendChild(img);
-                }
 
                 const content = document.createElement('div');
                 content.className = 'wa-chatbot-message-content';
@@ -879,7 +870,7 @@
                 scrollToBottom();
             }
 
-            // ===== INTENT MATCHING =====
+            // ===== INTENT MATCHING (AI FALLBACK) =====
             function findBestMatch(userInput) {
                 const input = userInput.toLowerCase().trim();
 
@@ -895,47 +886,80 @@
             }
 
             function getDefaultResponse() {
-                return "Great question! For official information:\n\nMain: 920-356-2120\nAdmissions: 800-860-7725\n\nA real person can give you the best answer!";
+                return "Thanks for your question. Based on Wayland Academy information, the best next step is to contact the school directly for official guidance. Main: 920-356-2120 | Admissions: 800-860-7725.";
+            }
+
+            async function getAIResponse(userText) {
+                if (!CONFIG.apiKey || !CONFIG.aiEndpoint) {
+                    return findBestMatch(userText) || getDefaultResponse();
+                }
+
+                const recentHistory = conversationHistory.slice(-(CONFIG.maxConversationTurns * 2));
+                const messages = [...recentHistory, { role: 'user', content: userText }];
+
+                const response = await fetch(CONFIG.aiEndpoint, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${CONFIG.apiKey}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        model: CONFIG.aiModel,
+                        messages
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`AI request failed with status ${response.status}`);
+                }
+
+                const payload = await response.json();
+                const text = payload?.choices?.[0]?.message?.content?.trim();
+
+                if (!text) {
+                    throw new Error('AI response was empty');
+                }
+
+                return text;
+            }
+
+            function setWaitingState(waiting) {
+                isWaitingForReply = waiting;
+                elements.userInput.disabled = waiting;
+                elements.sendBtn.disabled = waiting;
+                elements.sendBtn.textContent = waiting ? 'Thinking…' : 'Send';
             }
 
             // ===== USER INTERACTION =====
-            function handleUserMessage() {
-                if (isDisabled) return;
+            async function handleUserMessage() {
+                if (isDisabled || isWaitingForReply) return;
 
                 const userText = elements.userInput.value.trim();
                 if (!userText) return;
 
                 addMessage(userText, true);
                 elements.userInput.value = '';
+                setWaitingState(true);
 
-                setTimeout(() => {
-                    const response = findBestMatch(userText) || getDefaultResponse();
-                    addMessage(response, false);
-                }, 600);
+                try {
+                    const aiText = await getAIResponse(userText);
+                    addMessage(aiText, false);
+
+                    conversationHistory.push({ role: 'user', content: userText });
+                    conversationHistory.push({ role: 'assistant', content: aiText });
+                } catch (error) {
+                    const fallback = findBestMatch(userText) || getDefaultResponse();
+                    addMessage(fallback, false);
+                    console.error('Wayland chatbot AI error:', error);
+                } finally {
+                    setWaitingState(false);
+                    elements.userInput.focus();
+                }
             }
 
             function handleSuggestionClick(suggestionText) {
                 elements.userInput.value = suggestionText;
                 handleUserMessage();
-            }
-
-            // ===== MINIMIZE/MAXIMIZE =====
-            function minimizeWidget() {
-                isMinimized = true;
-                elements.widget.classList.add('wa-chatbot-minimized');
-                localStorage.setItem(CONFIG.storageKeyMinimized, 'true');
-            }
-
-            function maximizeWidget() {
-                isMinimized = false;
-                elements.widget.classList.remove('wa-chatbot-minimized');
-                localStorage.removeItem(CONFIG.storageKeyMinimized);
-            }
-
-            function checkMinimizedState() {
-                if (localStorage.getItem(CONFIG.storageKeyMinimized) === 'true') {
-                    minimizeWidget();
-                }
             }
 
             // ===== KILL SWITCH =====
@@ -973,17 +997,11 @@
                 addMessage(
                     "Hi! 👋 I'm your Wayland Academy assistant. Ask me about our schedule, clubs, location, or anything else about campus life!"
                 );
-                // Keep widget open after welcome message
-                openWidget();
             }
 
             function attachEventListeners() {
                 elements.launcherBtn.addEventListener('click', () => {
-                    if (isMinimized) {
-                        maximizeWidget();
-                    } else {
-                        isOpen ? closeWidget() : openWidget();
-                    }
+                    isOpen ? closeWidget() : openWidget();
                 });
 
                 elements.widget.addEventListener('click', (e) => {
@@ -1004,10 +1022,6 @@
                     }
                 });
 
-                elements.minimizeBtn.addEventListener('click', () => {
-                    isMinimized ? maximizeWidget() : minimizeWidget();
-                });
-
                 elements.killSwitchBtn.addEventListener('click', () => {
                     closeWidget();
                 });
@@ -1021,11 +1035,11 @@
 
             function init() {
                 checkDisabledState();
-                checkMinimizedState();
+                resetConversationHistory();
                 renderSuggestions();
                 attachEventListeners();
-                restoreState();
                 showWelcomeMessage();
+                restoreState();
             }
 
             // Launch when DOM is ready
