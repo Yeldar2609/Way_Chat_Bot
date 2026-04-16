@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ChevronDown, ChevronUp } from 'lucide-react';
+import { X } from 'lucide-react';
 
 function App() {
   const [isOpen, setIsOpen] = useState(false);
@@ -20,18 +20,22 @@ function App() {
       <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-4">
         {isOpen && (
           <div className={`transition-all duration-300 ease-out ${isMinimized ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
-            <div className="bg-white rounded-lg shadow-2xl p-6 max-w-sm w-96">
+            <div className="bg-red-500 rounded-lg shadow-2xl p-4 max-w-sm w-96">
               <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-bold text-gray-800">Chat with us!</h2>
+                <img
+                  src="/WaylandAcademyHorizontal_withSeal_WhiteOnly_TransparentBackground.png"
+                  alt="Wayland Academy"
+                  className="h-8"
+                />
                 <button
-                  onClick={toggleSize}
-                  className="p-1 hover:bg-gray-100 rounded transition-colors"
-                  aria-label="Minimize chat"
+                  onClick={() => setIsOpen(false)}
+                  className="p-1 hover:bg-red-600 rounded transition-colors text-white"
+                  aria-label="Close chat"
                 >
-                  {isMinimized ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+                  <X size={20} />
                 </button>
               </div>
-              <div className="text-gray-600 text-sm">
+              <div className="text-white text-sm">
                 <p>How can we help you today?</p>
               </div>
             </div>
